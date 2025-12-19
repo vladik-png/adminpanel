@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/Layout/Sidebar';
+import Infrastructure from './pages/Infrastructure';
 
-function App() {
-  const [count, setCount] = useState(0)
+const Dashboard = () => <div className="p-8 text-2xl font-bold text-slate-800">Welcome</div>;
 
+const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="flex bg-slate-100 min-h-screen">
+        <Sidebar />
+        
+        {/* Контент зміщений вправо через фіксований Sidebar */}
+        <div className="flex-1 ml-64">
+          <header className="h-16 bg-white border-b border-slate-200 flex items-center px-8 sticky top-0 z-10">
+            <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              Control Center / <span className="text-slate-900">Live Monitor</span>
+            </h1>
+          </header>
+          
+          <main>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/infrastructure" element={<Infrastructure />} />
+              {/* Додай інші маршрути тут */}
+            </Routes>
+          </main>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </Router>
+  );
+};
 
-export default App
+export default App;
