@@ -14,9 +14,9 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <div className="w-64 bg-[#0f172a] text-slate-400 flex flex-col min-h-screen fixed left-0 top-0 shadow-xl border-r border-slate-800/50">
-      <div className="p-8 text-white font-medium text-xl tracking-tight italic">
-        Leafy <span className="text-blue-400 not-italic">Admin</span>
+    <div className="w-64 bg-[#0f172a] text-slate-400 flex flex-col min-h-screen fixed left-0 top-0 shadow-xl border-r border-slate-800/50 font-medium">
+      <div className="p-8 text-white text-xl tracking-tight">
+        Leafy <span className="text-blue-400">Admin Panel</span>
       </div>
       
       <nav className="flex-1 mt-4 px-4">
@@ -31,17 +31,17 @@ const Sidebar: React.FC = () => {
             }`}
           >
             {item.icon}
-            <span className="text-[13px] font-medium uppercase tracking-wider">{item.name}</span>
+            <span className="text-[13px] uppercase tracking-wider">{item.name}</span>
           </Link>
         ))}
       </nav>
 
       <div className="p-4 border-t border-slate-800/50">
         <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-slate-800/50">
-          <div className="w-8 h-8 bg-blue-600/20 rounded-lg flex items-center justify-center text-[10px] font-medium text-blue-400 border border-blue-600/30 uppercase">VP</div>
+          <div className="w-8 h-8 bg-blue-600/20 rounded-lg flex items-center justify-center text-[10px] text-blue-400 border border-blue-600/30 uppercase">VP</div>
           <div className="overflow-hidden">
-            <p className="text-[11px] font-medium text-slate-200 truncate uppercase">vladik-png</p>
-            <p className="text-[9px] text-slate-500 font-medium uppercase tracking-tighter">System Admin</p>
+            <p className="text-[11px] text-slate-200 truncate uppercase">vladik-png</p>
+            <p className="text-[9px] text-slate-500 uppercase tracking-tighter">System Admin</p>
           </div>
         </div>
       </div>
