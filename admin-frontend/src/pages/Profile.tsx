@@ -34,8 +34,8 @@ const Profile: React.FC = () => {
     fetchProfile();
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#f1f5f9] animate-pulse uppercase tracking-widest text-xs">Loading...</div>;
-  if (!emp) return <div className="p-10 text-center text-red-500">Profile Not Found</div>;
+  if (loading) return <div className="min-h-screen bg-[#f1f5f9] flex items-center justify-center uppercase tracking-widest text-[10px] text-slate-400">Loading Configuration...</div>;
+  if (!emp) return <div className="p-10 text-center text-red-500 font-bold">Employee Not Found</div>;
 
   const formattedDate = new Date(emp.hire_date).toLocaleDateString('uk-UA', {
     year: 'numeric',
@@ -45,74 +45,70 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] pb-20">
-      {}
+      {/* 1. HERO BANNER - Компактний банер */}
       <div className="h-[200px] bg-gradient-to-r from-slate-900 via-[#0f172a] to-blue-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/40 via-transparent to-transparent"></div>
         
-        {}
-        <div className="max-w-7xl mx-auto px-8 pt-6 relative z-10 opacity-30 select-none pointer-events-none">
+        {/* PROFILE - Високо в кутку, менший розмір */}
+        <div className="max-w-7xl mx-auto px-10 pt-6 relative z-10 opacity-20 select-none">
            <h1 className="text-[6rem] font-black text-white leading-none tracking-tighter">
             PROFILE
            </h1>
         </div>
       </div>
 
-      {}
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 relative z-20 -mt-24">
-        <div className="bg-white/95 backdrop-blur-xl rounded-[3rem] shadow-2xl p-8 sm:p-12 border border-white/50 relative overflow-hidden">
+      {/* 2. MAIN CARD - Збільшена до max-w-6xl та опущена нижче (-mt-20) */}
+      <div className="max-w-6xl mx-auto px-8 relative z-20 -mt-20">
+        <div className="bg-white/95 backdrop-blur-xl rounded-[3.5rem] shadow-2xl p-12 lg:p-16 border border-white/50 relative overflow-hidden">
           
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-40 pointer-events-none"></div>
 
-          {}
-          <div className="flex flex-col md:flex-row gap-10 items-center md:items-end relative z-10 mb-16">
-            <div className="relative group">
-               <div className="absolute -inset-0.5 bg-gradient-to-br from-blue-500 to-blue-300 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+          {/* HEADER SECTION - Ім'я та прізвище в один рядок */}
+          <div className="flex flex-col md:flex-row gap-12 items-center mb-16 border-b border-slate-100 pb-16">
+            <div className="relative group shrink-0">
+              <div className="absolute -inset-1.5 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
               <img 
                 src={emp.avatar_url || `https://ui-avatars.com/api/?name=${emp.first_name}+${emp.last_name}&background=0D8ABC&color=fff`} 
-                alt="Profile" 
-                className="relative w-48 h-48 rounded-full border-[8px] border-white shadow-xl object-cover"
+                alt="Avatar" 
+                className="relative w-52 h-52 rounded-full border-[8px] border-white shadow-2xl object-cover"
               />
-              <div className="absolute bottom-2 right-2 bg-green-500 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-sm">
-                <ShieldCheck size={14} className="text-white" />
+              <div className="absolute bottom-2 right-2 bg-green-500 w-9 h-9 rounded-full border-[5px] border-white shadow-md flex items-center justify-center">
+                <ShieldCheck size={16} className="text-white" />
               </div>
             </div>
 
-            <div className="text-center md:text-left flex-1 pb-4">
-              <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-                <span className="px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full border border-blue-100">
-                  Employee ID: {emp.employee_id}
+            <div className="text-center md:text-left flex-1">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-5">
+                <span className="px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg border border-blue-100">
+                  ID: {emp.employee_id}
                 </span>
-                <div className="flex items-center gap-1 text-slate-400 text-[11px] uppercase font-bold tracking-wider">
-                  <MapPin size={12} className="text-blue-400" />
+                <div className="flex items-center gap-2 text-slate-400 text-[11px] uppercase font-bold tracking-[0.2em]">
+                  <MapPin size={14} className="text-blue-500" />
                   {emp.location}
                 </div>
               </div>
               
-              {}
-              <h1 className="text-5xl sm:text-6xl font-black text-slate-900 tracking-tighter mb-2 leading-tight">
-                {emp.first_name} <br className="hidden sm:block"/>
-                <span className="text-slate-900">
-                  {emp.last_name}
-                </span>
+              {/* Прізвище тепер чорне і в один рядок з іменем */}
+              <h1 className="text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-none">
+                {emp.first_name} {emp.last_name}
               </h1>
-              <p className="text-slate-500 text-sm font-medium tracking-wide">system_administrator • cinelink_team</p>
+              <p className="text-slate-400 text-sm font-bold uppercase tracking-[0.4em] mt-5">
+                Cinelink System Administrator
+              </p>
             </div>
           </div>
 
-          {}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative z-10">
-            <InfoTile icon={<Mail />} label="Corporate Email" value={emp.email} />
+          {/* 3. DATA TILES GRID - Широка сітка */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <InfoTile icon={<Mail />} label="Corporate Email" value={emp.email} isEmail />
             <InfoTile icon={<Phone />} label="Contact Phone" value={emp.phone} />
-            <InfoTile icon={<Calendar />} label="Hire Date" value={`${formattedDate}`} />
-            <InfoTile icon={<Briefcase />} label="Department" value={`Dept. ID #${emp.department_id}`} />
-            <InfoTile icon={<Hash />} label="System Role" value="Administrator Access" />
+            <InfoTile icon={<Calendar />} label="Hire Date" value={formattedDate} isDate />
+            <InfoTile icon={<Briefcase />} label="Current Unit" value={`Department #${emp.department_id}`} />
+            <InfoTile icon={<Hash />} label="Access Level" value="Administrator Role" />
             
-            {}
-            <div className="bg-gradient-to-br from-slate-900 to-blue-900 p-6 rounded-[2rem] flex items-center justify-center text-center group cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1">
-              <div>
-                <div className="text-white/80 text-3xl font-black mb-2 group-hover:text-white transition-colors">EDIT PROFILE</div>
-                <p className="text-blue-200/60 text-[10px] uppercase tracking-[0.2em] font-bold">Cumming Soon</p>
-              </div>
+            <div className="bg-slate-900 p-8 rounded-[2.2rem] flex flex-col justify-center items-center text-center group cursor-pointer hover:bg-black transition-all shadow-xl">
+              <div className="text-white text-2xl font-black uppercase tracking-tighter">Edit Profile</div>
+              <p className="text-blue-400/50 text-[9px] uppercase font-bold tracking-widest mt-2">Locked by system</p>
             </div>
           </div>
 
@@ -122,17 +118,24 @@ const Profile: React.FC = () => {
   );
 };
 
-const InfoTile: React.FC<{icon: React.ReactNode, label: string, value: string}> = ({icon, label, value}) => {
+// Компонент плитки з фіксами вирівнювання
+const InfoTile: React.FC<{
+  icon: React.ReactNode, 
+  label: string, 
+  value: string, 
+  isEmail?: boolean,
+  isDate?: boolean
+}> = ({icon, label, value, isEmail, isDate}) => {
   return (
-    <div className="bg-slate-50 hover:bg-white p-6 rounded-[2rem] border border-slate-100 transition-all duration-300 hover:shadow-xl hover:border-blue-100 group">
-      <div className="flex items-start gap-5">
-        <div className="p-4 bg-white text-blue-500 rounded-2xl shadow-sm border border-slate-100 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300">
-          {React.cloneElement(icon as React.ReactElement, { size: 24 })}
-        </div>
-        <div className="overflow-hidden">
-          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1.5">{label}</p>
-          <p className="text-lg font-bold text-slate-800 break-words leading-tight">{value}</p>
-        </div>
+    <div className="bg-slate-50/50 hover:bg-white p-7 rounded-[2.2rem] border border-slate-100 transition-all duration-300 hover:shadow-xl hover:border-blue-200 group flex items-center gap-6">
+      <div className="p-4 bg-white text-blue-600 rounded-2xl shadow-sm border border-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shrink-0">
+        {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+      </div>
+      <div className="overflow-hidden">
+        <p className="text-[10px] uppercase font-black text-slate-400 tracking-[0.15em] mb-1 leading-none">{label}</p>
+        <p className={`font-bold text-slate-800 leading-tight ${isEmail ? 'text-[14px] break-all' : 'text-lg'} ${isDate ? 'whitespace-nowrap' : ''}`}>
+          {value}
+        </p>
       </div>
     </div>
   );
