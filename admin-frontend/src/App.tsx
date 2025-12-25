@@ -5,6 +5,7 @@ import Infrastructure from './pages/Infrastructure';
 import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
+import Users from './pages/Users';
 
 const App: React.FC = () => {
   const isAuthenticated = () => {
@@ -30,6 +31,7 @@ const App: React.FC = () => {
                       <Route path="/infrastructure" element={<Infrastructure />} />
                       <Route path="/analytics" element={<Analytics />} />
                       <Route path="/profile" element={<Profile />} />
+                      <Route path="/users" element={<Users />} />
                       <Route path="*" element={<Navigate to="/analytics" />} />
                     </Routes>
                   </main>

@@ -8,17 +8,19 @@ const Infrastructure: React.FC = () => {
   const [region, setRegion] = useState<string>('FETCHING...');
   const [loading, setLoading] = useState<boolean>(true);
 
+  const INFRA_BASE_URL = 'http://13.62.214.254:8082';
+
   const fetchData = async () => {
     try {
       const [instRes, infoRes] = await Promise.all([
-        api.get('/'),
-        api.get('/info')
+        api.get(`${INFRA_BASE_URL}/`),
+        api.get(`${INFRA_BASE_URL}/info`)
       ]);
       const allInstances = instRes.data.flatMap((r: any) => r.Instances || []);
       setInstances(allInstances);
       setRegion(infoRes.data.region?.toUpperCase() || 'NOT FOUND');
     } catch (err) {
-      console.error(err);
+      console.error("Connection error to port 8082:", err);
     } finally {
       setLoading(false);
     }
@@ -39,8 +41,9 @@ const Infrastructure: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col bg-[#f8fafc] min-h-screen font-medium">
+      {}
       <div style={{ backgroundColor: themeColor }} className="py-4 px-10 flex justify-between items-center sticky top-0 z-50 shadow-md text-white">
-        <h2 className="text-sm tracking-widest uppercase">
+        <h2 className="text-sm tracking-widest uppercase font-bold">
           AWS EC2 Monitoring Center
         </h2>
         <div className="bg-[#1e293b] text-blue-400 text-[10px] px-4 py-1.5 rounded-lg border border-blue-600/20 uppercase tracking-widest">
@@ -51,7 +54,7 @@ const Infrastructure: React.FC = () => {
       <div className="p-10 w-full">
         <div className="flex justify-between items-center mb-10 border-b border-slate-200 pb-8">
           <div>
-            <h1 className="text-4xl text-slate-800 uppercase tracking-tighter">System Nodes</h1>
+            <h1 className="text-4xl text-slate-800 uppercase tracking-tighter font-black">System Nodes</h1>
             <p className="text-slate-400 mt-1 uppercase text-[10px] tracking-[0.3em]">Infrastructure Control Pipeline</p>
           </div>
           <button 
@@ -63,6 +66,7 @@ const Infrastructure: React.FC = () => {
           </button>
         </div>
 
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
           {instances.map((inst: any) => {
             const isRunning = inst.State?.Name === 'running';
@@ -87,25 +91,26 @@ const Infrastructure: React.FC = () => {
 
                 <div className="mb-8">
                   <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1">Instance Name</p>
-                  <h3 className="text-xl text-slate-800 mb-4 truncate tracking-tight">{getInstanceName(inst)}</h3>
+                  <h3 className="text-xl text-slate-800 font-bold mb-4 truncate tracking-tight">{getInstanceName(inst)}</h3>
                   
                   <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1">Identifier</p>
                   <code className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded tracking-tight">{inst.InstanceId}</code>
                 </div>
 
+                {}
                 <div className="flex gap-3">
                   <button 
-                    onClick={() => api.get(`/start?id=${inst.InstanceId}`).then(() => fetchData())}
+                    onClick={() => api.get(`${INFRA_BASE_URL}/start?id=${inst.InstanceId}`).then(() => fetchData())}
                     disabled={isRunning || isTransitioning}
                     style={{ backgroundColor: themeColor }}
-                    className="flex-1 text-white py-3 rounded-xl text-[10px] uppercase tracking-widest hover:opacity-90 disabled:opacity-20 transition-all shadow-sm"
+                    className="flex-1 text-white py-3 rounded-xl text-[10px] uppercase tracking-widest hover:opacity-90 disabled:opacity-20 transition-all shadow-sm font-bold"
                   >
                     Start
                   </button>
                   <button 
-                    onClick={() => api.get(`/stop?id=${inst.InstanceId}`).then(() => fetchData())}
+                    onClick={() => api.get(`${INFRA_BASE_URL}/stop?id=${inst.InstanceId}`).then(() => fetchData())}
                     disabled={!isRunning || isTransitioning}
-                    className="flex-1 border border-slate-200 text-slate-400 py-3 rounded-xl text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all disabled:opacity-20"
+                    className="flex-1 border border-slate-200 text-slate-400 py-3 rounded-xl text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all disabled:opacity-20 font-bold"
                   >
                     Stop
                   </button>
