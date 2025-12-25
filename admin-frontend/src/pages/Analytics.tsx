@@ -2,11 +2,12 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { TrendingUp, Server, Activity, Globe, HardDrive, AlertCircle } from 'lucide-react';
+import { Server, Activity, Globe, HardDrive, Cpu, LayoutGrid, Maximize2, Zap, Clock } from 'lucide-react';
 
 const Analytics: React.FC = () => {
   const [nodesHistory, setNodesHistory] = useState<Record<string, any[]>>({});
   const [activeCount, setActiveCount] = useState(0);
+  const [viewMode, setViewMode] = useState<'combined' | 'split'>('combined');
 
   const fetchAllMetrics = async () => {
     try {
@@ -15,7 +16,6 @@ const Analytics: React.FC = () => {
 
       setNodesHistory(prevHistory => {
         const newHistory = { ...prevHistory };
-
         Object.keys(allNodesData).forEach(nodeId => {
           const newNodeData = allNodesData[nodeId];
           const currentData = newHistory[nodeId] || [];
@@ -28,20 +28,16 @@ const Analytics: React.FC = () => {
               ram: newNodeData.ram,
               disk: parseFloat(newNodeData.disk), 
               ping: newNodeData.ping,
-              // ДОДАНО: Перетворюємо packet_loss у число
               packet_loss: parseFloat(newNodeData.packet_loss) || 0,
             }
           ];
-
           newHistory[nodeId] = updatedNodeHistory.slice(-20);
         });
-
         return newHistory;
       });
-
       setActiveCount(Object.keys(allNodesData).length);
     } catch (err) {
-      console.error("Error fetching multi-node metrics:", err);
+      console.error("Error fetching metrics:", err);
     }
   };
 
@@ -55,107 +51,183 @@ const Analytics: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col bg-[#f8fafc] min-h-screen font-medium">
+      {}
       <div style={{ backgroundColor: themeColor }} className="py-4 px-10 flex justify-between items-center sticky top-0 z-50 shadow-md">
-        <h2 className="text-sm text-white tracking-widest uppercase flex items-center gap-2">
+        <h2 className="text-sm text-white tracking-widest uppercase flex items-center gap-2 font-bold">
           <Activity size={16} className="text-blue-400" />
           Cloud Infrastructure Analytics
         </h2>
-        <div className="bg-blue-600/20 text-blue-400 text-[10px] px-4 py-1.5 rounded-lg border border-blue-600/30 uppercase tracking-widest">
-          Active Agents: <span className="text-white ml-1 font-medium">{activeCount} Nodes</span>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
+            <button 
+              onClick={() => setViewMode('combined')}
+              className={`p-1.5 rounded-md transition-all ${viewMode === 'combined' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+              title="Combined View"
+            >
+              <Maximize2 size={14} />
+            </button>
+            <button 
+              onClick={() => setViewMode('split')}
+              className={`p-1.5 rounded-md transition-all ${viewMode === 'split' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+              title="Split View"
+            >
+              <LayoutGrid size={14} />
+            </button>
+          </div>
+
+          <div className="bg-blue-600/20 text-blue-400 text-[10px] px-4 py-1.5 rounded-lg border border-blue-600/30 uppercase tracking-widest font-bold">
+            Active Agents: <span className="text-white ml-1 font-black">{activeCount} Nodes</span>
+          </div>
         </div>
       </div>
 
       <div className="p-10 w-full">
         <div className="mb-10 border-b border-slate-200 pb-8">
           <h1 className="text-4xl text-slate-800 uppercase tracking-tighter font-black">Real-time Telemetry</h1>
-          <p className="text-slate-400 mt-1 uppercase text-[10px] tracking-[0.3em]">Combined Metrics Pipeline</p>
+          <p className="text-slate-400 mt-1 uppercase text-[10px] tracking-[0.3em] font-bold">
+            {viewMode === 'combined' ? 'Combined Metrics Pipeline' : 'Individual Metrics Grid'}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-12">
-          {Object.keys(nodesHistory).length === 0 ? (
-            <div className="p-20 text-center border-2 border-dashed border-slate-200 rounded-[2rem]">
-              <p className="text-slate-400 uppercase text-xs tracking-widest animate-pulse">Waiting for agents...</p>
-            </div>
-          ) : (
-            Object.keys(nodesHistory).map(nodeId => {
-              const history = nodesHistory[nodeId];
-              const latest = history[history.length - 1];
+          {Object.keys(nodesHistory).map(nodeId => {
+            const history = nodesHistory[nodeId];
+            const latest = history[history.length - 1];
 
-              return (
-                <div key={nodeId} className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                    <div>
-                      <span className="text-[10px] text-blue-500 uppercase tracking-widest font-bold">Node Identifier</span>
-                      <h3 className="text-xl text-slate-800 tracking-tight uppercase flex items-center gap-2 font-black">
-                        <Server size={20} className="text-slate-400" />
-                        {nodeId}
-                      </h3>
-                    </div>
-
-                    {/* Додано Loss у швидку панель */}
-                    <div className="flex gap-10 text-[10px] uppercase font-bold tracking-widest">
-                        <div className="text-blue-500">CPU: {latest?.cpu}%</div>
-                        <div className="text-purple-500">RAM: {latest?.ram}%</div>
-                        <div className="text-orange-500">Disk: {latest?.disk}%</div>
-                        <div className="text-emerald-500">Ping: {latest?.ping}ms</div>
-                        <div className={latest?.packet_loss > 0 ? "text-red-500 animate-pulse" : "text-slate-400"}>
-                          Loss: {latest?.packet_loss}%
-                        </div>
-                    </div>
+            return (
+              <div key={nodeId} className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                  <div>
+                    <span className="text-[10px] text-blue-500 uppercase tracking-widest font-bold">Node Identifier</span>
+                    <h3 className="text-xl text-slate-800 tracking-tight uppercase flex items-center gap-2 font-black">
+                      <Server size={20} className="text-slate-400" />
+                      {nodeId}
+                    </h3>
                   </div>
 
-                  <div className="p-10">
-                    <div className="flex items-center gap-2 mb-6">
-                        <TrendingUp size={16} className="text-slate-800" />
-                        <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Combined System Load</span>
+                  {}
+                  {viewMode === 'combined' && (
+                    <div className="flex gap-10 text-[11px] uppercase font-black tracking-widest">
+                        <div className="text-blue-500">CPU: {latest?.cpu}%</div>
+                        <div className="text-purple-500">RAM: {latest?.ram}%</div>
+                        <div className="text-emerald-500">PING: {latest?.ping}MS</div>
+                        <div className={latest?.packet_loss > 0 ? "text-red-500 animate-pulse" : "text-slate-400"}>
+                          LOSS: {latest?.packet_loss}%
+                        </div>
                     </div>
-                    
+                  )}
+                </div>
+
+                <div className="p-10">
+                  {viewMode === 'combined' ? (
                     <div className="h-[400px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={history}>
+                        <AreaChart data={history} margin={{ left: -10, bottom: 20 }}>
                           <defs>
                             <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient>
-                            <linearGradient id="colorRam" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#a855f7" stopOpacity={0.1}/><stop offset="95%" stopColor="#a855f7" stopOpacity={0}/></linearGradient>
-                            <linearGradient id="colorDisk" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f97316" stopOpacity={0.1}/><stop offset="95%" stopColor="#f97316" stopOpacity={0}/></linearGradient>
                             <linearGradient id="colorPing" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient>
-                            {/* Градієнт для Packet Loss */}
-                            <linearGradient id="colorLoss" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.1}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient>
                           </defs>
-                          
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                          <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
-                          <YAxis domain={[0, 'auto']} axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
-                          <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                          <Legend verticalAlign="top" height={36} iconType="circle" />
-
-                          <Area name="CPU (%)" type="monotone" dataKey="cpu" stroke="#3b82f6" strokeWidth={3} fill="url(#colorCpu)" animationDuration={300} />
-                          <Area name="RAM (%)" type="monotone" dataKey="ram" stroke="#a855f7" strokeWidth={3} fill="url(#colorRam)" animationDuration={300} />
-                          <Area name="Disk (%)" type="monotone" dataKey="disk" stroke="#f97316" strokeWidth={3} fill="url(#colorDisk)" animationDuration={300} />
-                          <Area name="Ping (ms)" type="monotone" dataKey="ping" stroke="#10b981" strokeWidth={3} fill="url(#colorPing)" animationDuration={300} />
                           
-                          {/* ДОДАНО: Лінія втрати пакетів (червона) */}
-                          <Area 
-                            name="Packet Loss (%)" 
-                            type="stepAfter" 
-                            dataKey="packet_loss" 
-                            stroke="#ef4444" 
-                            strokeWidth={3} 
-                            fill="url(#colorLoss)" 
-                            animationDuration={300} 
+                          {}
+                          <XAxis 
+                            dataKey="time" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{fill: '#94a3b8', fontSize: 10}} 
+                            dy={10}
                           />
                           
+                          {}
+                          <YAxis 
+                            domain={[0, 360]} 
+                            ticks={[0, 90, 180, 270, 360]} 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{fill: '#94a3b8', fontSize: 10}} 
+                          />
+                          
+                          <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px rgba(0,0,0,0.05)' }} />
+                          <Legend verticalAlign="top" height={36} iconType="circle" />
+                          <Area name="CPU (%)" type="monotone" dataKey="cpu" stroke="#3b82f6" strokeWidth={3} fill="url(#colorCpu)" />
+                          <Area name="RAM (%)" type="monotone" dataKey="ram" stroke="#a855f7" strokeWidth={3} fill="url(#colorRam)" />
+                          <Area name="Disk (%)" type="monotone" dataKey="disk" stroke="#f97316" strokeWidth={3} fill="url(#colorDisk)" />
+                          <Area name="Ping (ms)" type="monotone" dataKey="ping" stroke="#10b981" strokeWidth={3} fill="url(#colorPing)" />
+                          <Area name="Loss (%)" type="stepAfter" dataKey="packet_loss" stroke="#ef4444" strokeWidth={3} fill="transparent" />
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <MiniChart title="CPU Usage" value={`${latest?.cpu}%`} data={history} dataKey="cpu" color="#3b82f6" icon={<Cpu size={14}/>} />
+                      <MiniChart title="RAM Usage" value={`${latest?.ram}%`} data={history} dataKey="ram" color="#a855f7" icon={<Activity size={14}/>} />
+                      <MiniChart title="Network Ping" value={`${latest?.ping}MS`} data={history} dataKey="ping" color="#10b981" icon={<Clock size={14}/>} />
+                      <MiniChart title="Disk Load" value={`${latest?.disk}%`} data={history} dataKey="disk" color="#f97316" icon={<HardDrive size={14}/>} />
+                      <MiniChart title="Packet Loss" value={`${latest?.packet_loss}%`} data={history} dataKey="packet_loss" color="#ef4444" icon={<Zap size={14}/>} isStep />
+                    </div>
+                  )}
                 </div>
-              );
-            })
-          )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
+
+const MiniChart = ({ title, value, data, dataKey, color, icon, isStep }: any) => (
+  <div className="bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100">
+    <div className="flex justify-between items-start mb-4">
+      <div className="flex items-center gap-2">
+        <div style={{ color }}>{icon}</div>
+        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{title}</span>
+      </div>
+      <span className="text-lg font-black text-slate-800 tracking-tight">{value}</span>
+    </div>
+    <div className="h-[180px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ left: -20, bottom: 20 }}>
+          <defs>
+            <linearGradient id={`color-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={color} stopOpacity={0.2}/>
+              <stop offset="95%" stopColor={color} stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+          
+          {}
+          <XAxis 
+            dataKey="time" 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{fill: '#94a3b8', fontSize: 10}} 
+            dy={10}
+          />
+          
+          {}
+          <YAxis 
+            domain={[0, 360]} 
+            ticks={[0, 90, 180, 270, 360]}
+            axisLine={false} 
+            tickLine={false} 
+            tick={{fill: '#94a3b8', fontSize: 10}} 
+          />
+          
+          <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', fontSize: '10px' }} />
+          <Area 
+            type={isStep ? "stepAfter" : "monotone"} 
+            dataKey={dataKey} 
+            stroke={color} 
+            strokeWidth={3} 
+            fill={`url(#color-${dataKey})`} 
+            animationDuration={300} 
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+);
 
 export default Analytics;
