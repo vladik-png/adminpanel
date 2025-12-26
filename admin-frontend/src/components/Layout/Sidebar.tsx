@@ -23,7 +23,7 @@ const Sidebar: React.FC = () => {
       if (!empId) return;
 
       try {
-        const response = await api.get(`http://13.62.214.254:8080/employee?employee_id=${empId}`);
+        const response = await api.get(`http://13.62.214.254:8080/employee/${empId}`);
         
         if (response.data && response.data.results) {
           setEmployee(response.data.results);
