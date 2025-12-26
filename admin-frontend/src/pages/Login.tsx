@@ -9,54 +9,45 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
-  setIsLoading(true);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
 
-  console.log("Відправка запиту на:", 'http://13.62.214.254:8080/auth/login/employee');
-  console.log("Дані:", { employee_code: employeeCode, password: password });
+    try {
+      const response = await api.post('http://13.62.214.254:8080/login', {
+        login: employeeCode, 
+        password: password
+      });
 
-  try {
-    const response = await api.post('http://13.62.214.254:8080/auth/login/employee', {
-      employee_code: employeeCode,
-      password: password
-    });
+      if (response.status === 200) {
+        const employeeId = response.data.results;
 
-    // ДИВИМОСЬ СЮДИ В КОНСОЛІ (F12)
-    console.log("Статус відповіді:", response.status);
-    console.log("Тіло відповіді (data):", response.data);
-
-    if (response.status === 200) {
-      // Перевіряємо, чи є поле results у відповіді
-      const employeeId = response.data.results;
-      console.log("Отримано ID працівника:", employeeId);
-
-      if (employeeId) {
-        localStorage.setItem('admin_token', 'true'); 
-        localStorage.setItem('employee_id', employeeId.toString());
-        console.log("Токени збережено, виконую перехід...");
-        navigate('/analytics');
-      } else {
-        setError("Сервер повернув успіх, але ID працівника порожній");
+        if (employeeId) {
+          localStorage.setItem('admin_token', 'true'); 
+          localStorage.setItem('employee_id', employeeId.toString());
+          navigate('/dashboard');
+        } else {
+          setError("Сервер повернув успіх, але ID порожній");
+        }
       }
+    } catch (err: any) {
+      if (err.response) {
+        const status = err.response.status;
+        if (status === 401) {
+          setError('Користувача не знайдено');
+        } else if (status === 403) {
+          setError('Невірний пароль');
+        } else {
+          setError(`Помилка сервера: ${status}`);
+        }
+      } else {
+        setError('Не вдалося з’єднатися з сервером');
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err: any) {
-    console.error("Повна помилка:", err);
-    if (err.response) {
-      console.log("Статус помилки від сервера:", err.response.status);
-      console.log("Дані помилки:", err.response.data);
-      
-      if (err.response.status === 401) setError('Працівника не знайдено');
-      else if (err.response.status === 403) setError('Невірний пароль');
-      else setError(`Помилка сервера: ${err.response.status}`);
-    } else {
-      setError('Не вдалося з’єднатися з сервером. Перевір інтернет та IP.');
-    }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-6">

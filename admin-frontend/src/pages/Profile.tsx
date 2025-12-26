@@ -45,11 +45,11 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] pb-20">
-      {/* 1. HERO BANNER - Компактний банер */}
+      {}
       <div className="h-[200px] bg-gradient-to-r from-slate-900 via-[#0f172a] to-blue-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/40 via-transparent to-transparent"></div>
         
-        {/* PROFILE - Високо в кутку, менший розмір */}
+        {}
         <div className="max-w-7xl mx-auto px-10 pt-6 relative z-10 opacity-20 select-none">
            <h1 className="text-[6rem] font-black text-white leading-none tracking-tighter">
             PROFILE
@@ -57,13 +57,13 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. MAIN CARD - Збільшена до max-w-6xl та опущена нижче (-mt-20) */}
+      {}
       <div className="max-w-6xl mx-auto px-8 relative z-20 -mt-20">
         <div className="bg-white/95 backdrop-blur-xl rounded-[3.5rem] shadow-2xl p-12 lg:p-16 border border-white/50 relative overflow-hidden">
           
           <div className="absolute -top-24 -right-24 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-40 pointer-events-none"></div>
 
-          {/* HEADER SECTION - Ім'я та прізвище в один рядок */}
+          {}
           <div className="flex flex-col md:flex-row gap-12 items-center mb-16 border-b border-slate-100 pb-16">
             <div className="relative group shrink-0">
               <div className="absolute -inset-1.5 bg-gradient-to-br from-blue-600 to-cyan-400 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
@@ -88,7 +88,7 @@ const Profile: React.FC = () => {
                 </div>
               </div>
               
-              {/* Прізвище тепер чорне і в один рядок з іменем */}
+              {}
               <h1 className="text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-none">
                 {emp.first_name} {emp.last_name}
               </h1>
@@ -98,7 +98,7 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* 3. DATA TILES GRID - Широка сітка */}
+          {}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <InfoTile icon={<Mail />} label="Corporate Email" value={emp.email} isEmail />
             <InfoTile icon={<Phone />} label="Contact Phone" value={emp.phone} />
@@ -118,7 +118,6 @@ const Profile: React.FC = () => {
   );
 };
 
-// Компонент плитки з фіксами вирівнювання
 const InfoTile: React.FC<{
   icon: React.ReactNode, 
   label: string, 
