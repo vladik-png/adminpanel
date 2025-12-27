@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-import { LayoutDashboard, Users, ShieldAlert, Server, BarChart3, LogOut } from 'lucide-react';
+// Додав іконку Contact2 для працівників [cite: 2025-12-27]
+import { LayoutDashboard, Users, ShieldAlert, Server, BarChart3, LogOut, Contact2 } from 'lucide-react';
 
 interface Employee {
   first_name: string;
@@ -24,7 +25,6 @@ const Sidebar: React.FC = () => {
 
       try {
         const response = await api.get(`http://13.62.214.254:8080/employee/${empId}`);
-        
         if (response.data && response.data.results) {
           setEmployee(response.data.results);
         }
@@ -42,20 +42,17 @@ const Sidebar: React.FC = () => {
     navigate('/');
   }
 
+  // Оновлений список меню з вкладкою Employees [cite: 2025-12-27]
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18}/> },
     { name: 'Users', path: '/users', icon: <Users size={18}/> },
+    { name: 'Employees', path: '/employees', icon: <Contact2 size={18}/> }, // Нова вкладка
     { name: 'Moderation', path: '/moderation', icon: <ShieldAlert size={18}/> },
     { name: 'AWS Server', path: '/infrastructure', icon: <Server size={18}/> },
     { name: 'Analytics', path: '/analytics', icon: <BarChart3 size={18}/> },
   ];
 
-  const getInitials = () => {
-    if (!employee) return "??";
-    return `${employee.first_name[0]}${employee.last_name[0]}`.toUpperCase();
-  };
-
- return (
+  return (
     <div className="w-64 bg-[#0f172a] text-slate-400 flex flex-col min-h-screen fixed left-0 top-0 shadow-xl border-r border-slate-800/50 font-medium">
       <div className="p-8 text-white text-xl tracking-tight">
         Cinelink <span className="text-blue-400">Admin Panel</span>
@@ -78,7 +75,7 @@ const Sidebar: React.FC = () => {
         ))}
       </nav>
 
-<div className="p-4 border-t border-slate-800/50 space-y-2">
+      <div className="p-4 border-t border-slate-800/50 space-y-2">
         <Link 
           to="/profile" 
           className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 group ${

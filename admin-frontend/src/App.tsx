@@ -7,6 +7,8 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
 import Dashboard from './pages/Dashboard';
+import Employees from './pages/Employees';
+
 
 const App: React.FC = () => {
   const isAuthenticated = () => {
@@ -24,7 +26,6 @@ const App: React.FC = () => {
             isAuthenticated() ? (
               <div className="flex w-full min-h-screen bg-[#f8fafc]">
                 <Sidebar />
-                {/* ml-64 ТУТ — ЦЕ ЄДИНИЙ ВІДСТУП, ЯКИЙ МАЄ БУТИ */}
                 <div className="flex-1 ml-64 min-h-screen flex flex-col">
                   <main className="flex-1 w-full">
                     <Routes>
@@ -33,6 +34,7 @@ const App: React.FC = () => {
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/users" element={<Users />} />
                       <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/employees" element={<Employees />} />
                       <Route path="*" element={<Navigate to="/dashboard" />} />
                     </Routes>
                   </main>

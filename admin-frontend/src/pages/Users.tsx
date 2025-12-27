@@ -101,18 +101,18 @@ const Users: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col bg-[#f8fafc] min-h-screen font-medium relative">
-      {/* Header Panel */}
+      {}
       <div className="bg-[#0f172a] py-4 px-10 flex justify-between items-center sticky top-0 z-50 shadow-md text-white border-b border-slate-800">
         <div className="flex items-center gap-2">
            <ShieldCheck size={16} className="text-[#3b82f6]" />
-           <h2 className="text-sm tracking-widest uppercase font-bold text-white">Staff Management System</h2>
+           <h2 className="text-sm tracking-widest uppercase font-bold text-white">User Management System</h2>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="relative w-72">
             <input 
               type="text" 
-              placeholder="Quick database search..." 
+              placeholder="Search user..." 
               value={searchTerm} 
               onChange={(e) => setSearchTerm(e.target.value)} 
               className="w-full bg-slate-800/50 border border-slate-700 text-white text-[11px] px-10 py-3 rounded-xl outline-none focus:border-[#3b82f6] transition-all placeholder:text-slate-600" 
@@ -125,14 +125,14 @@ const Users: React.FC = () => {
       <div className="p-10 w-full">
         <div className="mb-10 border-b border-slate-200 pb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-4xl text-slate-900 uppercase tracking-tighter font-black leading-none">Customer Base</h1>
+            <h1 className="text-4xl text-slate-900 uppercase tracking-tighter font-black leading-none">Users List</h1>
             <p className="text-slate-400 mt-2 uppercase text-[10px] tracking-[0.4em]">Node records: {processedUsers.length}</p>
           </div>
 
-          {/* Панель керування: Експорт зліва від Сортування [cite: 2025-12-27] */}
+          {}
           <div className="flex items-center gap-3">
             
-            {/* Кнопка Export: Колір як у списку, зліва [cite: 2025-12-27] */}
+            {}
             <button 
               onClick={exportToCSV}
               className="flex items-center gap-3 bg-[#0f172a] border border-slate-800 text-[#3b82f6] text-[11px] font-black uppercase px-6 py-4 rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 active:scale-95"
@@ -141,7 +141,7 @@ const Users: React.FC = () => {
               <span>Export CSV</span>
             </button>
 
-            {/* Список сортування [cite: 2025-12-27] */}
+            {}
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b82f6]">
                 <SlidersHorizontal size={12} />
@@ -151,10 +151,10 @@ const Users: React.FC = () => {
                 onChange={(e) => setSortType(e.target.value as any)}
                 className="appearance-none bg-[#0f172a] border border-slate-800 text-[#3b82f6] text-[11px] font-black uppercase pl-11 pr-12 py-4 rounded-2xl outline-none hover:bg-slate-800 transition-all cursor-pointer shadow-xl shadow-slate-900/20 active:scale-95"
               >
-                <option value="newest">Sort: Newest First</option>
-                <option value="oldest">Sort: Oldest First</option>
-                <option value="az">Sort: Alphabet A-Z</option>
-                <option value="za">Sort: Alphabet Z-A</option>
+                <option value="newest">Sort: Newest</option>
+                <option value="oldest">Sort: Oldest</option>
+                <option value="az">Sort: A-Z</option>
+                <option value="za">Sort: Z-A</option>
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3b82f6] pointer-events-none">
                 <ChevronDown size={14} />
@@ -163,7 +163,7 @@ const Users: React.FC = () => {
           </div>
         </div>
 
-        {/* User Grid */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {processedUsers.map((worker) => (
             <div key={worker.user_id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-7 group hover:shadow-xl transition-all duration-300">
@@ -192,7 +192,7 @@ const Users: React.FC = () => {
         </div>
       </div>
 
-      {/* Profile Modal */}
+      {}
       {selectedUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedUser(null)}>
           <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
