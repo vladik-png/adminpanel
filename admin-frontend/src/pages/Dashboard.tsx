@@ -1,161 +1,214 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { 
   ThermometerSun, MapPin, Users as UsersIcon, 
-  Activity, Server, Database, Clock, ArrowUpRight
+  Activity, Server, Database, Clock, ArrowRight,
+  HardDrive, UserPlus, UserCircle
 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [employee, setEmployee] = useState<any>(null);
   const [weather, setWeather] = useState<any>(null);
-  const [stats, setStats] = useState({ users: 0 });
+  const [stats, setStats] = useState({ users: 0, activeNodes: 0 });
+  const [lastUsers, setLastUsers] = useState<any[]>([]);
   const [time, setTime] = useState(new Date().toLocaleTimeString());
-  
-  // Живі метрики (симуляція реальних даних)
-  const [metrics, setMetrics] = useState({ cpu: 12.4, db: 84.2 });
+
+  const [systemMetrics, setSystemMetrics] = useState({
+    cpu: 0, 
+    ram: 0,
+    disk: 0,
+    ping: 0
+  });
+
+  const fetchWeather = async (location: string) => {
+    if (!location) return;
+    try {
+      const cleanCity = location.replace(/city/gi, '').trim();
+      let query = cleanCity;
+      if (!query.toLowerCase().includes('ukraine')) {
+        query += ',Ukraine';
+      }
+      const encodedQuery = encodeURIComponent(query);
+      const res = await fetch(`https://wttr.in/${encodedQuery}?format=j1`);
+      const data = await res.json();
+      if (data.current_condition) {
+        setWeather({
+          temp: data.current_condition[0].temp_C,
+          resolvedPlace: data.nearest_area?.[0]?.areaName?.[0]?.value
+        });
+      }
+    } catch (e) { console.error("Weather error:", e); }
+  };
+
+  const fetchData = async () => {
+    const empId = localStorage.getItem('employee_id');
+    if (!empId) return;
+
+    try {
+      const usersRes = await api.get('/users');
+      if (usersRes.data?.results) {
+        const allUsers = usersRes.data.results;
+        setStats(prev => ({ ...prev, users: allUsers.length }));
+        setLastUsers(allUsers.slice(-3).reverse());
+      }
+
+      const metricsRes = await api.get('http://13.62.214.254:8081/system-metrics');
+      const allNodesData = metricsRes.data;
+      const nodeIds = Object.keys(allNodesData);
+      
+      if (nodeIds.length > 0) {
+        let totalCpu = 0;
+        let totalRam = 0;
+        let totalDisk = 0;
+
+        nodeIds.forEach(id => {
+          totalCpu += allNodesData[id].cpu || 0;
+          totalRam += allNodesData[id].ram || 0;
+          totalDisk += parseFloat(allNodesData[id].disk) || 0;
+        });
+
+        const count = nodeIds.length;
+        setStats(prev => ({ ...prev, activeNodes: count }));
+        setSystemMetrics({
+          cpu: Math.round(totalCpu / count),
+          ram: Math.round(totalRam / count),
+          disk: Math.round(totalDisk / count),
+          ping: allNodesData[nodeIds[0]].ping || 0
+        });
+      }
+
+      const empRes = await api.get(`/employee/${empId}`);
+      if (empRes.data?.results) {
+        setEmployee(empRes.data.results);
+        fetchWeather(empRes.data.results.location);
+      }
+
+    } catch (err: any) { console.error("Fetch error", err); }
+  };
 
   useEffect(() => {
-    // 1. Оновлення годинника кожну секунду (корисно для терміналу)
-    const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
-
-    // 2. Симуляція зміни навантаження (поки не підключено Go-агент)
-    const metricInterval = setInterval(() => {
-      setMetrics(prev => ({
-        cpu: +(prev.cpu + (Math.random() * 2 - 1)).toFixed(1),
-        db: +(prev.db + (Math.random() * 0.1)).toFixed(1)
-      }));
-    }, 3000);
-
-    const fetchData = async () => {
-      const empId = localStorage.getItem('employee_id');
-      if (!empId) return;
-      try {
-        const empRes = await api.get(`/employee/${empId}`);
-        setEmployee(empRes.data.results);
-
-        if (empRes.data.results?.location) {
-          const city = empRes.data.results.location.split(',')[0].trim();
-          const weatherRes = await fetch(`https://wttr.in/${city},Ivano-Frankivsk,Ukraine?format=j1`);
-          const wData = await weatherRes.json();
-          setWeather({
-            temp: wData.current_condition[0].temp_C,
-            condition: wData.current_condition[0].weatherDesc[0].value
-          });
-        }
-        const usersRes = await api.get('/users');
-        setStats({ users: usersRes.data.results?.length || 0 });
-      } catch (err) { console.error(err); }
-    };
-
     fetchData();
-    return () => { clearInterval(timer); clearInterval(metricInterval); };
+    const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
+    const metricsInterval = setInterval(fetchData, 5000); 
+    return () => { clearInterval(timer); clearInterval(metricsInterval); };
   }, []);
 
   return (
-    // ml-64 ПРИБРАНО, бо він вже є в App.tsx
-    <div className="w-full min-h-screen p-10 flex flex-col items-start justify-start bg-[#f8fafc]">
+    <div className="w-full min-h-screen p-10 flex flex-col items-start bg-[#f8fafc] gap-10">
       
-      {/* ВЕРХНЯ ПАНЕЛЬ: Погода + Новий Годинник */}
-      <div className="w-full flex justify-between items-start mb-16">
-        <div className="text-left">
-          <h1 className="text-[54px] font-black text-slate-900 uppercase tracking-tighter leading-none">
-            CONTROL <span className="text-blue-600">TERMINAL</span>
-          </h1>
-          <div className="flex items-center gap-4 mt-4">
-            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.5em]">
-              System Monitoring
-            </p>
-            <div className="flex items-center gap-2 bg-slate-900 text-blue-400 px-3 py-1 rounded-lg font-mono text-xs shadow-lg">
-              <Clock size={12} /> {time}
-            </div>
-          </div>
+      {}
+      <div className="w-full flex justify-between items-start">
+        <div>
+          <h1 className="text-[52px] font-black text-slate-900 uppercase tracking-tighter leading-none">Command Center</h1>
+          <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.5em] mt-4 flex items-center gap-2">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            System Live: {stats.activeNodes} Nodes Active
+          </p>
         </div>
 
-        {/* Weather Widget */}
-        <div className="bg-white p-5 rounded-[2.2rem] shadow-2xl shadow-blue-900/5 border border-white flex items-center gap-5 min-w-[300px]">
-          <div className="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-500/30">
-            <ThermometerSun size={24} />
-          </div>
-          <div className="text-left">
-            <p className="flex items-center gap-1.5 text-blue-600 font-black text-[9px] uppercase tracking-widest mb-1">
-              <MapPin size={10} /> {employee?.location || "ЗАМУЛИНЦІ CITY"}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 tracking-tighter">
+        <div className="flex items-center gap-4">
+          <div className="bg-white px-6 py-3 rounded-[1.8rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                <MapPin size={8} className="inline mr-1" /> {employee?.location || "Loading..."}
+              </p>
+              <p className="text-lg font-black text-slate-900 leading-none">
                 {weather ? `${weather.temp}°C` : "--°C"}
-              </span>
-              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">
-                {weather?.condition || "LOADING..."}
-              </span>
+              </p>
             </div>
+            <div className="bg-blue-50 p-2.5 rounded-xl text-blue-600">
+              <ThermometerSun size={18} />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 text-blue-400 px-6 py-3 rounded-[1.8rem] font-mono text-sm shadow-xl flex items-center gap-3 border border-slate-800">
+            <Clock size={16} /> {time}
           </div>
         </div>
       </div>
 
-      {/* КАРТКИ МЕТРИК: Тепер з динамічними даними */}
-      <div className="flex flex-wrap gap-8 mb-12 w-full justify-start">
-        <StatTile icon={<UsersIcon />} label="Total Users" value={stats.users.toString()} unit="accounts" />
-        <StatTile icon={<Activity />} label="CPU Usage" value={`${metrics.cpu}%`} unit="load" isLive />
-        <StatTile icon={<Server />} label="Node Status" value="Online" unit="stable" />
-        <StatTile icon={<Database />} label="DB Capacity" value={`${metrics.db}%`} unit="filled" />
+      {}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full">
+        <NavCard icon={<UsersIcon />} title="Total Users" value={stats.users} unit="DB" color="blue" onClick={() => navigate('/users')} />
+        <NavCard icon={<Activity />} title="Avg CPU Load" value={systemMetrics.cpu} unit="%" color="indigo" onClick={() => navigate('/analytics')} />
+        <NavCard icon={<Server />} title="Avg RAM Usage" value={systemMetrics.ram} unit="%" color="emerald" onClick={() => navigate('/analytics')} />
+        <NavCard icon={<HardDrive />} title="Total Disk" value={systemMetrics.disk} unit="%" color="rose" onClick={() => navigate('/infrastructure')} />
       </div>
 
-      {/* МОЯ ДОБАВКА: РЕАЛЬНО КОРИСНИЙ БЛОК — ACTIVITY LOG & QUICK ACTIONS */}
-      <div className="w-full grid grid-cols-1 xl:grid-cols-3 gap-8">
-        
-        {/* Останні дії в системі */}
-        <div className="xl:col-span-2 bg-white rounded-[3rem] p-10 shadow-xl border border-slate-100">
-           <div className="flex justify-between items-center mb-8">
-              <h3 className="text-slate-900 font-black uppercase tracking-widest text-sm">Recent Activity Log</h3>
-              <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">Live Update</span>
-           </div>
-           <div className="space-y-4">
-              {[1, 2, 3].map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
-                   <div className="flex items-center gap-4">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <p className="text-xs font-bold text-slate-700 uppercase">User registration successful</p>
-                   </div>
-                   <span className="text-[10px] font-mono text-slate-400">14:2{i} PM</span>
-                </div>
-              ))}
-           </div>
+      {}
+      <div className="w-full bg-white rounded-[2.2rem] p-10 border border-slate-100 shadow-sm">
+        <div className="flex justify-between items-center mb-10">
+          <div className="flex items-center gap-4">
+            <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+              <UserPlus size={20} />
+            </div>
+            <h3 className="text-slate-900 font-black uppercase tracking-widest text-xs">Recent Registrations</h3>
+          </div>
+
+          {}
+          <button 
+            onClick={() => navigate('/users')}
+            className="flex items-center gap-3 bg-slate-900 text-blue-400 px-8 py-3 rounded-2xl hover:opacity-90 transition-all active:scale-95 shadow-lg border border-slate-800"
+          >
+            <span className="text-[10px] font-black uppercase tracking-widest">View All Users</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
 
-        {/* Швидкі дії */}
-        <div className="bg-[#0f172a] rounded-[3rem] p-10 shadow-2xl relative overflow-hidden">
-           <div className="relative z-10">
-              <h3 className="text-white font-black uppercase tracking-widest text-sm mb-6">Quick Actions</h3>
-              <div className="space-y-3">
-                 <button className="w-full py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-700 transition-all">
-                    Generate Report <ArrowUpRight size={14}/>
-                 </button>
-                 <button className="w-full py-4 bg-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
-                    System Reboot
-                 </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {lastUsers.map((user: any) => (
+            <div 
+              key={user.user_id} 
+              className="flex items-center gap-4 bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 transition-all"
+            >
+              <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white border border-slate-200 flex-shrink-0">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} className="w-full h-full object-cover" alt="avatar" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-300">
+                    <UserCircle size={24} />
+                  </div>
+                )}
               </div>
-           </div>
+              <div className="min-w-0">
+                {}
+                <p className="text-xs font-black text-slate-800 uppercase truncate">
+                  {user.first_name} {user.last_name || ""}
+                </p>
+                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">
+                  @{user.username}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
-
       </div>
     </div>
   );
 };
 
-const StatTile = ({ icon, label, value, unit, isLive }: any) => (
-  <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 flex flex-col items-start min-w-[260px] group transition-all duration-300">
-    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all">
-      {React.cloneElement(icon, { size: 22 })}
+const NavCard = ({ icon, title, value, unit, color, onClick }: any) => {
+  const colors: any = {
+    blue: "text-blue-600 bg-blue-50",
+    indigo: "text-indigo-600 bg-indigo-50",
+    emerald: "text-emerald-600 bg-emerald-50",
+    rose: "text-rose-600 bg-rose-50"
+  };
+  return (
+    <div onClick={onClick} className="bg-white p-8 rounded-[2.2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${colors[color]}`}>
+        {React.cloneElement(icon, { size: 22 })}
+      </div>
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</p>
+      <div className="flex items-baseline gap-2">
+        <p className="text-4xl font-black text-slate-900 tracking-tighter">{value}</p>
+        <p className="text-[10px] font-bold text-slate-300 uppercase">{unit}</p>
+      </div>
+      <ArrowRight className="absolute top-8 right-8 text-slate-100 group-hover:text-blue-600 transition-colors" size={20} />
     </div>
-    <div className="flex items-center gap-2">
-      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-      {isLive && <span className="w-1 h-1 bg-red-500 rounded-full animate-ping mb-1"></span>}
-    </div>
-    <div className="flex items-baseline gap-2">
-      <p className="text-4xl font-black text-slate-900 tracking-tighter">{value}</p>
-      <span className="text-[10px] font-bold text-slate-300 uppercase">{unit}</span>
-    </div>
-  </div>
-);
+  );
+};
 
 export default Dashboard;
