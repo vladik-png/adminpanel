@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import axios from 'axios'; // 1. Використовуємо стандартний axios для 8082 порту
 import { RefreshCcw, Activity } from 'lucide-react';
 
 const Infrastructure: React.FC = () => {
@@ -12,9 +13,10 @@ const Infrastructure: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      // 2. Робимо запит через axios.get, щоб уникнути конфлікту baseURL
       const [instRes, infoRes] = await Promise.all([
-        api.get(`${INFRA_BASE_URL}/`),
-        api.get(`${INFRA_BASE_URL}/info`)
+        axios.get(`${INFRA_BASE_URL}/`),
+        axios.get(`${INFRA_BASE_URL}/info`)
       ]);
       const allInstances = instRes.data.flatMap((r: any) => r.Instances || []);
       setInstances(allInstances);
@@ -26,9 +28,26 @@ const Infrastructure: React.FC = () => {
     }
   };
 
+  // 3. Функція для керування живленням з обробкою помилок
+  const handlePowerAction = async (action: 'start' | 'stop', id: string) => {
+    console.log(`Запит на ${action} для вузла: ${id}`);
+    try {
+      const response = await axios.get(`${INFRA_BASE_URL}/${action}`, {
+        params: { id: id } // Передаємо ID як параметр запиту
+      });
+      console.log(`Сервер відповів:`, response.data);
+      
+      // Невелике очікування перед оновленням, щоб AWS встиг змінити статус
+      setTimeout(fetchData, 1000); 
+    } catch (err: any) {
+      console.error(`Помилка дії ${action}:`, err.message);
+      alert(`Не вдалося виконати дію: ${err.message}`);
+    }
+  };
+
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 2000);
+    const interval = setInterval(fetchData, 5000); // Збільшено інтервал до 5 сек
     return () => clearInterval(interval);
   }, []);
 
@@ -41,11 +60,8 @@ const Infrastructure: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col bg-[#f8fafc] min-h-screen font-medium">
-      {}
       <div style={{ backgroundColor: themeColor }} className="py-4 px-10 flex justify-between items-center sticky top-0 z-50 shadow-md text-white">
-        <h2 className="text-sm tracking-widest uppercase font-bold">
-          AWS EC2 Monitoring Center
-        </h2>
+        <h2 className="text-sm tracking-widest uppercase font-bold">AWS EC2 Monitoring Center</h2>
         <div className="bg-[#1e293b] text-blue-400 text-[10px] px-4 py-1.5 rounded-lg border border-blue-600/20 uppercase tracking-widest">
           Region: <span className="text-white ml-1">{region}</span>
         </div>
@@ -66,11 +82,11 @@ const Infrastructure: React.FC = () => {
           </button>
         </div>
 
-        {}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
           {instances.map((inst: any) => {
             const isRunning = inst.State?.Name === 'running';
-            const isTransitioning = inst.State?.Name === 'pending' || inst.State?.Name === 'stopping';
+            // Додано 'starting' до станів переходу
+            const isTransitioning = ['pending', 'stopping', 'starting', 'shutting-down'].includes(inst.State?.Name);
 
             return (
               <div key={inst.InstanceId} className="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm p-8 hover:shadow-md transition-all border-t-2 border-t-blue-500/50">
@@ -92,15 +108,13 @@ const Infrastructure: React.FC = () => {
                 <div className="mb-8">
                   <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1">Instance Name</p>
                   <h3 className="text-xl text-slate-800 font-bold mb-4 truncate tracking-tight">{getInstanceName(inst)}</h3>
-                  
                   <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1">Identifier</p>
                   <code className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded tracking-tight">{inst.InstanceId}</code>
                 </div>
 
-                {}
                 <div className="flex gap-3">
                   <button 
-                    onClick={() => api.get(`${INFRA_BASE_URL}/start?id=${inst.InstanceId}`).then(() => fetchData())}
+                    onClick={() => handlePowerAction('start', inst.InstanceId)} // Оновлений виклик
                     disabled={isRunning || isTransitioning}
                     style={{ backgroundColor: themeColor }}
                     className="flex-1 text-white py-3 rounded-xl text-[10px] uppercase tracking-widest hover:opacity-90 disabled:opacity-20 transition-all shadow-sm font-bold"
@@ -108,7 +122,7 @@ const Infrastructure: React.FC = () => {
                     Start
                   </button>
                   <button 
-                    onClick={() => api.get(`${INFRA_BASE_URL}/stop?id=${inst.InstanceId}`).then(() => fetchData())}
+                    onClick={() => handlePowerAction('stop', inst.InstanceId)} // Оновлений виклик
                     disabled={!isRunning || isTransitioning}
                     className="flex-1 border border-slate-200 text-slate-400 py-3 rounded-xl text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all disabled:opacity-20 font-bold"
                   >
@@ -116,7 +130,7 @@ const Infrastructure: React.FC = () => {
                   </button>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>
