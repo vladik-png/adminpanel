@@ -24,13 +24,10 @@ const Employees: React.FC = () => {
     console.log("--- Спроба завантаження працівників ---");
     try {
       setLoading(true);
-      // Робимо запит прямо за URL, який ти дав [cite: 2025-12-27]
       const res = await api.get('http://13.62.214.254:8080/employee');
       
-      // ДЕБАГ: тепер ми точно побачимо структуру [cite: 2025-12-27]
       console.log("RAW DATA:", JSON.stringify(res.data, null, 2));
 
-      // Гнучка перевірка структури відповіді [cite: 2025-12-27]
       if (res.data && res.data.results && Array.isArray(res.data.results)) {
         setEmployees(res.data.results);
       } else if (Array.isArray(res.data)) {

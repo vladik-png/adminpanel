@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="w-full min-h-screen flex flex-col bg-[#f8fafc] font-medium">
       
-      {/* ВЕРХНЯ ПАНЕЛЬ (ЯК НА ІНШИХ СТОРІНКАХ) [cite: 2025-12-27] */}
+      {}
       <div className="bg-[#0f172a] py-4 px-10 flex justify-between items-center sticky top-0 z-50 shadow-md text-white border-b border-slate-800">
         <div className="flex items-center gap-2">
            <ShieldCheck size={16} className="text-[#3b82f6]" />
@@ -113,7 +113,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="p-10 flex flex-col gap-10">
-        {/* Page Title & Stats Header */}
+        {}
         <div className="w-full flex justify-between items-start">
           <div>
             <h1 className="text-[52px] font-black text-slate-900 uppercase tracking-tighter leading-none">Command Center</h1>
@@ -144,7 +144,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Cards */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full">
           <NavCard icon={<UsersIcon />} title="Total Users" value={stats.users} unit="DB" color="blue" onClick={() => navigate('/users')} />
           <NavCard icon={<Activity />} title="Avg CPU Load" value={systemMetrics.cpu} unit="%" color="indigo" onClick={() => navigate('/analytics')} />
@@ -152,7 +152,7 @@ const Dashboard: React.FC = () => {
           <NavCard icon={<HardDrive />} title="Total Disk" value={systemMetrics.disk} unit="%" color="rose" onClick={() => navigate('/infrastructure')} />
         </div>
 
-        {/* Recent Section */}
+        {}
         <div className="w-full bg-white rounded-[2.2rem] p-10 border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-10">
             <div className="flex items-center gap-4">

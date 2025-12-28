@@ -225,7 +225,7 @@ const Users: React.FC = () => {
                     </div>
                 </div>
 
-                {/* БЛОК БІОГРАФІЇ */}
+                {}
                 {selectedUser.bio && (
                   <div className="mb-6 p-5 bg-slate-50 rounded-2xl border border-slate-100">
                     <p className="text-[9px] text-slate-400 uppercase font-black mb-2 tracking-widest flex items-center gap-2"><BookOpen size={10}/> Biography</p>
