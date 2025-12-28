@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-// Додав іконку Contact2 для працівників [cite: 2025-12-27]
 import { LayoutDashboard, Users, ShieldAlert, Server, BarChart3, LogOut, Contact2 } from 'lucide-react';
 
 interface Employee {
@@ -42,11 +41,10 @@ const Sidebar: React.FC = () => {
     navigate('/');
   }
 
-  // Оновлений список меню з вкладкою Employees [cite: 2025-12-27]
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18}/> },
     { name: 'Users', path: '/users', icon: <Users size={18}/> },
-    { name: 'Employees', path: '/employees', icon: <Contact2 size={18}/> }, // Нова вкладка
+    { name: 'Employees', path: '/employees', icon: <Contact2 size={18}/> },
     { name: 'Moderation', path: '/moderation', icon: <ShieldAlert size={18}/> },
     { name: 'AWS Server', path: '/infrastructure', icon: <Server size={18}/> },
     { name: 'Analytics', path: '/analytics', icon: <BarChart3 size={18}/> },

@@ -77,7 +77,6 @@ const Users: React.FC = () => {
 
       if (res.ok) {
         const nextState = !currentActive;
-        // Оновлюємо обидва поля, щоб логіка ніде не "збоїла"
         setUsers(prev => prev.map(u => 
           u.user_id === user.user_id ? { ...u, is_active: nextState, status: nextState ? 'active' : 'inactive' } : u
         ));
@@ -91,7 +90,7 @@ const Users: React.FC = () => {
   const handleViewProfile = async (worker: UserData) => {
     if (!worker.user_id) return;
     try {
-      setSelectedUser(worker); // Одразу показуємо те, що є (з поштою)
+      setSelectedUser(worker);
 
       const res = await fetch(`http://13.62.214.254:8080/users/${worker.user_id}`, {
         method: 'GET',
@@ -106,7 +105,6 @@ const Users: React.FC = () => {
           return {
             ...prev,
             ...detailed, 
-            // ПРІОРИТЕТ: якщо сервер не прислав пошту, лишаємо стару зі списку
             email: detailed.email || prev.email || worker.email,
             is_active: prev.is_active, 
             status: prev.status,

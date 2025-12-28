@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import axios from 'axios'; // 1. Використовуємо стандартний axios для 8082 порту
+import axios from 'axios';
 import { RefreshCcw, Activity } from 'lucide-react';
 
 const Infrastructure: React.FC = () => {
@@ -13,7 +13,6 @@ const Infrastructure: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      // 2. Робимо запит через axios.get, щоб уникнути конфлікту baseURL
       const [instRes, infoRes] = await Promise.all([
         axios.get(`${INFRA_BASE_URL}/`),
         axios.get(`${INFRA_BASE_URL}/info`)
@@ -28,16 +27,14 @@ const Infrastructure: React.FC = () => {
     }
   };
 
-  // 3. Функція для керування живленням з обробкою помилок
   const handlePowerAction = async (action: 'start' | 'stop', id: string) => {
     console.log(`Запит на ${action} для вузла: ${id}`);
     try {
       const response = await axios.get(`${INFRA_BASE_URL}/${action}`, {
-        params: { id: id } // Передаємо ID як параметр запиту
+        params: { id: id }
       });
       console.log(`Сервер відповів:`, response.data);
-      
-      // Невелике очікування перед оновленням, щоб AWS встиг змінити статус
+
       setTimeout(fetchData, 1000); 
     } catch (err: any) {
       console.error(`Помилка дії ${action}:`, err.message);
@@ -47,7 +44,7 @@ const Infrastructure: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5000); // Збільшено інтервал до 5 сек
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -85,7 +82,6 @@ const Infrastructure: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
           {instances.map((inst: any) => {
             const isRunning = inst.State?.Name === 'running';
-            // Додано 'starting' до станів переходу
             const isTransitioning = ['pending', 'stopping', 'starting', 'shutting-down'].includes(inst.State?.Name);
 
             return (
@@ -114,7 +110,7 @@ const Infrastructure: React.FC = () => {
 
                 <div className="flex gap-3">
                   <button 
-                    onClick={() => handlePowerAction('start', inst.InstanceId)} // Оновлений виклик
+                    onClick={() => handlePowerAction('start', inst.InstanceId)}
                     disabled={isRunning || isTransitioning}
                     style={{ backgroundColor: themeColor }}
                     className="flex-1 text-white py-3 rounded-xl text-[10px] uppercase tracking-widest hover:opacity-90 disabled:opacity-20 transition-all shadow-sm font-bold"
@@ -122,7 +118,7 @@ const Infrastructure: React.FC = () => {
                     Start
                   </button>
                   <button 
-                    onClick={() => handlePowerAction('stop', inst.InstanceId)} // Оновлений виклик
+                    onClick={() => handlePowerAction('stop', inst.InstanceId)}
                     disabled={!isRunning || isTransitioning}
                     className="flex-1 border border-slate-200 text-slate-400 py-3 rounded-xl text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all disabled:opacity-20 font-bold"
                   >

@@ -103,7 +103,7 @@ const Employees: React.FC = () => {
       <div className="p-10 w-full">
         <div className="mb-10 border-b border-slate-200 pb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-4xl text-slate-900 uppercase tracking-tighter font-black leading-none">Employee Roster</h1>
+            <h1 className="text-4xl text-slate-900 uppercase tracking-tighter font-black leading-none">Employee List</h1>
             <p className="text-slate-400 mt-2 uppercase text-[10px] tracking-[0.4em]">Active personnel: {filteredEmployees.length}</p>
           </div>
 
