@@ -5,7 +5,7 @@ import api from '../api/axios';
 import { 
   Mail, Calendar, ShieldCheck, Search, UserCircle, X, 
   Download, Trash2, Clock, ChevronDown, SlidersHorizontal, ShieldAlert, CheckCircle,
-  BookOpen 
+  BookOpen, Users as UsersIcon, UserPlus
 } from 'lucide-react';
 
 interface UserData {
@@ -19,6 +19,9 @@ interface UserData {
   is_active: boolean; 
   status?: string;
   bio?: string;
+  followers?: number;
+  followings?: number;
+  bg_img_url?: string;
 }
 
 const Users: React.FC = () => {
@@ -62,7 +65,6 @@ const Users: React.FC = () => {
   const handleToggleStatus = async (user: UserData) => {
     if (!user || !user.user_id) return;
 
-    // СУВОРА ПЕРЕВІРКА: щоб бан не з'являвся просто так
     const currentActive = !!(user.is_active || user.status === 'active');
     const method = currentActive ? "DELETE" : "POST";
 
@@ -151,7 +153,7 @@ const Users: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-10 w-full">
+      <div className="p-10 w-full text-slate-900">
         <div className="mb-10 border-b border-slate-200 pb-8 flex justify-between items-end">
           <div>
             <h1 className="text-4xl text-slate-900 uppercase font-black leading-none">Users List</h1>
@@ -192,7 +194,6 @@ const Users: React.FC = () => {
                     <h3 className="text-[17px] font-black text-slate-900 truncate uppercase">{worker.first_name} {worker.last_name}</h3>
                     <p className="text-[10px] text-[#3b82f6] font-bold mt-0.5">@{worker.username}</p>
                     
-                    {/* ПОВЕРНУТО: ДАТА РЕЄСТРАЦІЇ */}
                     <div className="flex items-center gap-2 mt-3 text-slate-400">
                       <Calendar size={11} />
                       <span className="text-[9px] font-bold uppercase tracking-wider">Joined {new Date(worker.created_at).toLocaleDateString('uk-UA')}</span>
@@ -209,14 +210,18 @@ const Users: React.FC = () => {
       {selectedUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedUser(null)}>
           <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
-            <div className="h-32 bg-[#0f172a] relative">
-              <button onClick={() => setSelectedUser(null)} className="absolute top-6 right-6 p-2 text-white/50 hover:text-white"><X size={20} /></button>
+            {}
+            <div 
+              className="h-32 bg-[#0f172a] relative bg-cover bg-center"
+              style={{ backgroundImage: selectedUser.bg_img_url ? `url(${selectedUser.bg_img_url})` : 'none' }}
+            >
+              <button onClick={() => setSelectedUser(null)} className="absolute top-6 right-6 p-2 text-white/50 hover:text-white bg-black/20 rounded-full backdrop-blur-sm"><X size={20} /></button>
             </div>
             
             <div className="px-12 pb-12">
                 <div className="relative -mt-16 mb-8 flex items-end gap-6">
                     <img src={selectedUser.avatar_url} className="w-32 h-32 rounded-[2.5rem] border-8 border-white shadow-xl object-cover" alt="profile" />
-                    <div>
+                    <div className="pb-2">
                         <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-tight">{selectedUser.first_name} {selectedUser.last_name}</h2>
                         <div className="flex items-center gap-2 mt-1">
                           <span className={`w-2 h-2 rounded-full animate-pulse ${(selectedUser.is_active || selectedUser.status === 'active') ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
@@ -226,6 +231,23 @@ const Users: React.FC = () => {
                 </div>
 
                 {}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+                        <UsersIcon size={16} className="text-[#3b82f6]" />
+                        <div>
+                            <p className="text-slate-900 font-black text-sm leading-none">{selectedUser.followers || 0}</p>
+                            <p className="text-[8px] text-slate-400 uppercase font-black tracking-widest mt-1">Followers</p>
+                        </div>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+                        <UserPlus size={16} className="text-[#3b82f6]" />
+                        <div>
+                            <p className="text-slate-900 font-black text-sm leading-none">{selectedUser.followings || 0}</p>
+                            <p className="text-[8px] text-slate-400 uppercase font-black tracking-widest mt-1">Following</p>
+                        </div>
+                    </div>
+                </div>
+
                 {selectedUser.bio && (
                   <div className="mb-6 p-5 bg-slate-50 rounded-2xl border border-slate-100">
                     <p className="text-[9px] text-slate-400 uppercase font-black mb-2 tracking-widest flex items-center gap-2"><BookOpen size={10}/> Biography</p>
